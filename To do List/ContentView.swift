@@ -25,7 +25,7 @@ struct ContentView: View {
                     Text("To-do List")
                         .font(.largeTitle)
                         .bold()
-                        .foregroundStyle(Color.white)
+                        .foregroundStyle(Color("PrimaryPink"))
                     Image("checklist-icon")
                         .resizable()
                         .frame(width: 50, height: 50)
@@ -39,7 +39,7 @@ struct ContentView: View {
                     .frame(width: 225)
                     .padding(.horizontal,15)
                     .shadow(radius: 25)
-                    .foregroundColor(Color.pink)
+                    .foregroundColor(Color("PrimaryPink"))
                     
                     // Add Task Button
                     Button{
@@ -49,7 +49,7 @@ struct ContentView: View {
                         Text("Add Task")
                             .font(.subheadline)
                             .frame(width: 90, height: 40)
-                            .foregroundColor(Color.pink)
+                            .foregroundColor(Color("PrimaryPink"))
                             .background(Color.white)
                             .cornerRadius(25)
                             .shadow(radius: 25)
