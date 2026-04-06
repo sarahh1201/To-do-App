@@ -1,9 +1,8 @@
 import SwiftUI
 
-struct ContentView: View {
+struct ListView: View {
     
-    @State private var lists: [TodoList] = []
-    @State private var selectedListIndex: Int = 0
+    @Binding var list: TodoList
     @State private var todo: String = ""
     @State private var newListName: String = ""
     
@@ -19,7 +18,7 @@ struct ContentView: View {
                 // Title
                 HStack {
                     
-                    Text("To-do List")
+                    Text(list.name)
                         .font(.largeTitle)
                         .bold()
                         .foregroundStyle(Color("PrimaryPink"))
@@ -29,31 +28,6 @@ struct ContentView: View {
                         .frame(width: 50, height: 50)
                         .cornerRadius(10)
                         .padding(.horizontal, 10)
-                }
-                
-                // List selector
-                if !lists.isEmpty {
-                    Picker("Select List", selection: $selectedListIndex) {
-                        ForEach(lists.indices, id: \.self) { index in
-                            Text(lists[index].name).tag(index)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                }
-                
-                // Create new list
-                HStack {
-                    TextField("New list name", text: $newListName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(width: 200)
-                    
-                    Button("Add List") {
-                        addList()
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(20)
-                    .foregroundColor(Color("PrimaryPink"))
                 }
                 
                 // Add task
@@ -124,88 +98,41 @@ struct ContentView: View {
             .padding()
             .preferredColorScheme(.light)
             .onAppear {
-                loadLists()
             }
         }
     }
+
     
     // MARK: - Computed current tasks
     var currentTasks: [Task] {
-        guard !lists.isEmpty else { return [] }
-        return lists[selectedListIndex].tasks
+        list.tasks
     }
     
     // MARK: - Functions
-    
-    func addList() {
-        guard !newListName.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        
-        let newList = TodoList(name: newListName, tasks: [])
-        lists.append(newList)
-        selectedListIndex = lists.count - 1
-        newListName = ""
-        saveLists()
-    }
-    
     func addTask() {
         guard !todo.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        guard !lists.isEmpty else { return }
-        
+
         let newTask = Task(title: todo, isCompleted: false)
-        lists[selectedListIndex].tasks.append(newTask)
+        list.tasks.append(newTask)
         todo = ""
-        saveLists()
     }
     
     func deleteTask(at offsets: IndexSet) {
-        lists[selectedListIndex].tasks.remove(atOffsets: offsets)
-        saveLists()
+        list.tasks.remove(atOffsets: offsets)
     }
     
     func toggleTask(_ task: Task) {
-        if let index = lists[selectedListIndex].tasks.firstIndex(where: { $0.id == task.id }) {
-            lists[selectedListIndex].tasks[index].isCompleted.toggle()
-            saveLists()
+        if let index = list.tasks.firstIndex(where: { $0.id == task.id }) {
+            list.tasks[index].isCompleted.toggle()
         }
     }
     
     func clearTasks() {
-        lists[selectedListIndex].tasks.removeAll()
-        saveLists()
+        list.tasks.removeAll()
     }
-    
-    // MARK: - Persistence
-    
-    func saveLists() {
-        if let encoded = try? JSONEncoder().encode(lists) {
-            UserDefaults.standard.set(encoded, forKey: "lists")
-        }
-    }
-    
-    func loadLists() {
-        if let data = UserDefaults.standard.data(forKey: "lists"),
-           let decoded = try? JSONDecoder().decode([TodoList].self, from: data) {
-            lists = decoded
-        } else {
-            lists = [TodoList(name: "Default", tasks: [])]
-        }
-    }
-}
 
-// MARK: - Models
-
-struct TodoList: Identifiable, Codable {
-    var id = UUID()
-    var name: String
-    var tasks: [Task]
-}
-
-struct Task: Identifiable, Codable {
-    var id = UUID()
-    var title: String
-    var isCompleted: Bool
 }
 
 #Preview {
-    ContentView()
+    DashboardView()
 }
